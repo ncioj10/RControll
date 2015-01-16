@@ -1,6 +1,7 @@
 package de.jakob.nicolas.rcontroll;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -139,7 +140,15 @@ public class MainActivity extends ActionBarActivity {
 
         public void onStart() {
             super.onStart();
-
+            if (!bt.isBluetoothEnabled()) {
+                Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(intent, BluetoothState.REQUEST_ENABLE_BT);
+            } else {
+                if (!bt.isServiceAvailable()) {
+                    bt.setupService();
+                    bt.startService(BluetoothState.DEVICE_OTHER);
+                    setup();
+                }
 
                 joystick = (JoystickView) getActivity().findViewById(R.id.joystickView);
                 angleTextView = (TextView) getActivity().findViewById(R.id.angleTextView);
@@ -197,7 +206,7 @@ public class MainActivity extends ActionBarActivity {
                     }
                 }, JoystickView.DEFAULT_LOOP_INTERVAL);
 
-
+            }
 
         }
 
