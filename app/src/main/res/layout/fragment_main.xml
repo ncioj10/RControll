@@ -31,4 +31,36 @@
         android:id="@+id/editText"
         android:layout_above="@+id/button_send"
         android:layout_centerHorizontal="true" />
+
+    <com.zerokol.views.JoystickView android:id="@+id/joystickView" android:layout_width="150dp" android:layout_height="150dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/angleTextView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/powerTextView"
+        android:layout_below="@+id/angleTextView"
+        android:layout_alignRight="@+id/angleTextView"
+        android:layout_alignEnd="@+id/angleTextView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/directionTextView"
+        android:layout_below="@+id/powerTextView"
+        android:layout_alignRight="@+id/powerTextView"
+        android:layout_alignEnd="@+id/powerTextView" />
 </RelativeLayout>

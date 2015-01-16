@@ -1,7 +1,6 @@
 package de.jakob.nicolas.rcontroll;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,7 +13,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.zerokol.views.JoystickView;
+import com.zerokol.views.JoystickView.OnJoystickMoveListener;
 
 import app.akexorcist.bluetotohspp.library.BluetoothSPP;
 import app.akexorcist.bluetotohspp.library.BluetoothState;
@@ -72,6 +75,12 @@ public class MainActivity extends ActionBarActivity {
         Button btnSend;
         Intent lastConnected;
 
+        private JoystickView joystick;
+
+        private TextView angleTextView;
+        private TextView powerTextView;
+        private TextView directionTextView;
+
 
         public BluetoothFragment() {
 
@@ -102,12 +111,7 @@ public class MainActivity extends ActionBarActivity {
                 }
             });
 
-            bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
-                public void onDataReceived(byte[] data, String message) {
-                    Toast.makeText(getActivity().getApplicationContext(), message, Toast.LENGTH_SHORT).show();
 
-                }
-            });
 
             bt.setBluetoothConnectionListener(new BluetoothSPP.BluetoothConnectionListener() {
                 public void onDeviceConnected(String name, String address) {
@@ -135,19 +139,68 @@ public class MainActivity extends ActionBarActivity {
 
         public void onStart() {
             super.onStart();
-            if (!bt.isBluetoothEnabled()) {
-                Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(intent, BluetoothState.REQUEST_ENABLE_BT);
-            } else {
-                if (!bt.isServiceAvailable()) {
-                    bt.setupService();
-                    bt.startService(BluetoothState.DEVICE_OTHER);
-                    setup();
-                }
-            }
+
+
+                joystick = (JoystickView) getActivity().findViewById(R.id.joystickView);
+                angleTextView = (TextView) getActivity().findViewById(R.id.angleTextView);
+                powerTextView = (TextView) getActivity().findViewById(R.id.powerTextView);
+                directionTextView = (TextView) getActivity().findViewById(R.id.directionTextView);
+                // Listener of events, it'll return the angle in graus and power in percents
+                // return to the direction of the moviment
+                joystick.setOnJoystickMoveListener(new OnJoystickMoveListener() {
+                    @Override
+                    public void onValueChanged(int angle, int power, int direction) {
+                        angleTextView.setText(" " + String.valueOf(angle) + "°");
+                        powerTextView.setText(" " + String.valueOf(power) + "%");
+                        switch (direction) {
+                            case JoystickView.FRONT:
+                                directionTextView.setText("Vorne");
+                                bt.send("1", true);
+                                break;
+
+                            case JoystickView.FRONT_RIGHT:
+                                directionTextView.setText("Vorne Rechts");
+                                bt.send("1", true);
+
+                                break;
+
+                            case JoystickView.RIGHT:
+                                directionTextView.setText("Rechts");
+                                break;
+
+                            case JoystickView.RIGHT_BOTTOM:
+                                directionTextView.setText("Rechts Unten");
+                                break;
+
+                            case JoystickView.BOTTOM:
+                                directionTextView.setText("Unten");
+                                bt.send("2", true);
+                                break;
+
+                            case JoystickView.BOTTOM_LEFT:
+                                directionTextView.setText("Unten Links");
+                                bt.send("2", true);
+                                break;
+
+                            case JoystickView.LEFT:
+                                directionTextView.setText("Links");
+                                break;
+
+                            case JoystickView.LEFT_FRONT:
+                                directionTextView.setText("Vorne Links");
+                                break;
+
+                            default:
+                                directionTextView.setText("Mitte");
+                                bt.send("0", true);
+                        }
+                    }
+                }, JoystickView.DEFAULT_LOOP_INTERVAL);
+
 
 
         }
+
 
         public void onResume(){
             super.onResume();
