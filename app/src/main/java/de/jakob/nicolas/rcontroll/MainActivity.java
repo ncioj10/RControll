@@ -21,6 +21,7 @@ import com.zerokol.views.JoystickView;
 import com.zerokol.views.JoystickView.OnJoystickMoveListener;
 
 import app.akexorcist.bluetotohspp.library.BluetoothSPP;
+import app.akexorcist.bluetotohspp.library.BluetoothSPP.OnDataReceivedListener;
 import app.akexorcist.bluetotohspp.library.BluetoothState;
 import app.akexorcist.bluetotohspp.library.DeviceList;
 
@@ -70,11 +71,13 @@ public class MainActivity extends ActionBarActivity {
      */
     public static class BluetoothFragment extends Fragment {
 
-        private static final String LOG_BT_FRAG = "Button Fragment";
+        private static final String LOG_FRAGMENT_BT = "Button Fragment";
         public BluetoothSPP bt;
         EditText editText;
         Button btnSend;
         Intent lastConnected;
+        int  commandArray[]= new int[] {0,0,5,0};
+
 
         private JoystickView joystick;
 
@@ -84,6 +87,7 @@ public class MainActivity extends ActionBarActivity {
 
 
         public BluetoothFragment() {
+
 
 
         }
@@ -161,53 +165,85 @@ public class MainActivity extends ActionBarActivity {
                     public void onValueChanged(int angle, int power, int direction) {
                         angleTextView.setText(" " + String.valueOf(angle) + "°");
                         powerTextView.setText(" " + String.valueOf(power) + "%");
+
+                        //Reset Array
+                        commandArray= new int[] {0,0,5,0};
+
                         switch (direction) {
                             case JoystickView.FRONT:
                                 directionTextView.setText("Vorne");
-                                bt.send("1", true);
+                                commandArray[1] = 1;
                                 break;
 
                             case JoystickView.FRONT_RIGHT:
                                 directionTextView.setText("Vorne Rechts");
-                                bt.send("1", true);
-
+                                commandArray[1] = 1;
+                                commandArray[0] = 1;
                                 break;
 
                             case JoystickView.RIGHT:
                                 directionTextView.setText("Rechts");
+                                commandArray[0] = 1;
                                 break;
 
                             case JoystickView.RIGHT_BOTTOM:
                                 directionTextView.setText("Rechts Unten");
+                                commandArray[1] = 2;
+                                commandArray[0] = 1;
                                 break;
 
                             case JoystickView.BOTTOM:
                                 directionTextView.setText("Unten");
-                                bt.send("2", true);
+                                commandArray[1] = 2;
                                 break;
 
                             case JoystickView.BOTTOM_LEFT:
                                 directionTextView.setText("Unten Links");
-                                bt.send("2", true);
+                                commandArray[1] = 2;
+                                commandArray[0] = 2;
                                 break;
 
                             case JoystickView.LEFT:
                                 directionTextView.setText("Links");
+                                commandArray[0] = 2;
                                 break;
 
                             case JoystickView.LEFT_FRONT:
                                 directionTextView.setText("Vorne Links");
+                                commandArray[1] = 1;
+                                commandArray[0] = 2;
                                 break;
 
                             default:
                                 directionTextView.setText("Mitte");
-                                bt.send("0", true);
+
                         }
+                        sendCommand();
                     }
                 }, JoystickView.DEFAULT_LOOP_INTERVAL);
 
             }
 
+            bt.setOnDataReceivedListener(new OnDataReceivedListener() {
+                public void onDataReceived(byte[] data, String message) {
+                    Toast.makeText(getActivity().getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                    Log.v(LOG_FRAGMENT_BT, message+"back");
+                }
+            });
+
+        }
+
+        public void sendCommand(){
+            StringBuffer command =new StringBuffer("") ;
+            for(int commandPart : commandArray){
+                command.append(commandPart);
+            }
+            if(command != null && command.toString() != "") {
+                bt.send(command.toString(), true);
+                Log.v(LOG_FRAGMENT_BT, command.toString());
+            }else{
+                Log.e(LOG_FRAGMENT_BT, "Command is null");
+            }
         }
 
 
